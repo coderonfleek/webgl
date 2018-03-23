@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>WebGL Practise</title>
+    <script src="three.min.js"></script>
+    <script src="OrbitControls.js"></script>
+</head>
+<body>
+
+    <div id="container"></div>
+    
+
+    <script>
+        //console.log(THREE);
+
+        //Create scene
+        const scene = new THREE.Scene();
+
+        console.log(scene);
+
+        //Height and Width of the scene
+        const WIDTH = 400;
+        const HEIGHT = 300;
+
+        //Set camera properties
+        const VIEW_ANGLE = 45;
+        const ASPECT = WIDTH / HEIGHT;
+        const NEAR = 0.1;
+        const FAR = 10000;
+
+        //Create camera
+        const camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+        //Set camera position (NB: Without setting camera position, it will be at 0, 0, 0 default and controls wont work)
+        camera.position.set( 0, 0, 1 );
+        //camera.position.set(0,6,0);
+        scene.add(camera);
+
+        /*Create an Object*/
+
+        //Create Geometry (Spherical)
+        // Set up the sphere vars
+        const RADIUS = 50;
+        const SEGMENTS = 16;
+        const RINGS = 16;
+
+        const sphereGeometry = new THREE.SphereGeometry(RADIUS, SEGMENTS, RINGS);
+
+        //Create the material for the sphere
+        const sphereMaterial = new THREE.MeshLambertMaterial(
+            {
+                color: 0xCC0000
+            }
+        )
+
+        //Create the sphere mesh
+        const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        //Set sphere position
+        // Move the Sphere back in Z so we can see it
+
+        sphere.position.z = -300;
+
+        //Add the sphere to the scene
+        scene.add(sphere);
+
+        /*Light up the scene */
+        const pointLight = new THREE.PointLight(0xFFFFFF);
+
+        // set its position
+        pointLight.position.x = 10;
+        pointLight.position.y = 50;
+        pointLight.position.z = 130;
+
+        //Add the light to the scene
+        scene.add(pointLight);
+
+        /*  Rendering the Scene */
+        //Create the renderer
+        const renderer = new THREE.WebGLRenderer();
+
+        // Start the renderer.
+        renderer.setSize(WIDTH, HEIGHT);
+
+        // Set the background color of the scene.
+        renderer.setClearColor(0x333F47, 1);
+
+        //We then get a reference to the html container to which we want to put the renderer in
+        const container = document.querySelector('#container');
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+
+
+        //Now we attach the render-supplied DOM element to our DOM
+        container.appendChild(renderer.domElement);
+
+        update ();
+
+        function update () {
+            // Draw!
+            renderer.render(scene, camera);
+
+            // Schedule the next frame.
+            requestAnimationFrame(update);
+
+            controls.update();
+        }
+
+        // Schedule the first frame.
+        requestAnimationFrame(update);
+
+
+
+    </script>
+</body>
+</html>
