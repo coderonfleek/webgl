@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Basic Scene</title>
+
+    
+</head>
+<body>
+    
+
+    <script src="three.js"></script>
+
+    <script>
+
+        //Required items
+        var renderer; //Renders the scene
+        var scene; //What to be displayed
+        var camera; //Controls what we see
+
+        window.onload = init();
+
+        //Function to initialize the scene
+        function init(){
+
+            //Create Scene
+            scene = new THREE.Scene();
+
+            //Create renderer
+            renderer = new THREE.WebGLRenderer();
+            //Set background color
+            renderer.setClearColor(0x000000, 1.0);
+            //Set size
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            //Enable the display of shadows
+            renderer.shadowMapEnabled = true;
+
+            //Create Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            //Set Camera Postion
+            camera.position.x = 15;
+            camera.position.y = 16;
+            camera.position.z = 13;
+
+            //Point the camera at the centre of the scene
+            camera.lookAt(scene.position);
+
+            /* 
+                The code above will create a blank black screen, cos we haven't added any objects or lights,
+                Now lets add that
+            */
+
+            //**Add cube
+            var cubeGeometry = new THREE.CubeGeometry(6,4,6);//width, height, depth
+            var cubeMaterial = new THREE.MeshLambertMaterial({
+                color : "red"
+            });
+
+            var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            cube.castShadow = true;
+
+            scene.add(cube);
+
+            //**Add floor
+            var planeGeometry = new THREE.PlaneGeometry(20, 20);
+            var planeMaterial = new THREE.MeshLambertMaterial({
+                color: 0xcccccc
+            });
+
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.receiveShadow = true;
+            //Make plane horizontal instead of the default vertical orientation
+            plane.rotation.x = -0.5 * Math.PI;//90 degrees rotation
+
+            //Normally the plane will cut through the middle of the cube's height after rotation (4/2), to make 
+            //the plane at the botton, move it down the y-axis by 2 points
+            plane.position.y = -2;
+            scene.add(plane);
+
+            //**Adding Lights
+            var spotLight = new THREE.SpotLight(0xffffff);//White light
+            spotLight.position.set(10, 20, 20);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+
+            //Attach the renderer to the entire page
+            document.body.appendChild(renderer.domElement);
+
+            render();
+
+        }//init
+
+        function render(){
+            renderer.render(scene, camera);
+            //Setup render loop
+            requestAnimationFrame(render);
+        }//render
+    </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>3D Globe</title>
+</head>
+
+<body>
+
+
+    <script src="../three.js"></script>
+    <script src="OrbitControls.js"></script>
+
+    <script>
+        var scene;
+        var camera;
+        var renderer;
+        var cameraControl;
+
+        window.onload = init();
+
+        function init() {
+
+            scene = new THREE.Scene();
+
+            //**Create Camera
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            //Set Camera Postion
+            camera.position.x = 35;
+            camera.position.y = 36;
+            camera.position.z = 33;
+
+            //Point the camera at the centre of the scene
+            camera.lookAt(scene.position);
+
+            //scene.add(camera);
+
+            // add controls : We use orbital controls so we can orbit the earth mesh
+            cameraControl = new THREE.OrbitControls(camera);
+
+            //**Create Earth Sphere
+            var sphereGeometry = new THREE.SphereGeometry(15, 30, 30);//radius, width segments, height segments (only radius is required)
+
+            //With this material, the color of a mesh isn't determined by lighting, but is determined by
+            //its normal vector, or in other words, by the angle of the face. This is a good material
+            //to use when you're testing the position of your camera, the way the geometry looks,
+            //and whether the scene is initialized correctly.
+            //var sphereMaterial = new THREE.MeshNormalMaterial();
+
+            //Use earth material
+            var sphereMaterial = createEarthMaterial();
+
+            var earthMesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            earthMesh.name = "earth";
+
+            scene.add(earthMesh);
+
+            //**Create Cloud
+            //To render the clouds, we create another sphere and position it at exactly 
+            //the same location, but we make this one slightly larger.
+            var cloudGeometry = new THREE.SphereGeometry(sphereGeometry.parameters.radius * 1.01, sphereGeometry.parameters.widthSegments, sphereGeometry.parameters.heightSegments);
+
+            var cloudMaterial = createCloudMaterial();
+
+            var cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+            cloudMesh.name = "cloud";
+
+            scene.add(cloudMesh);
+
+            //**Create renderer
+            renderer = new THREE.WebGLRenderer();
+            //Set background color
+            renderer.setClearColor(0x000000, 1.0);
+            //Set size
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            //Enable the display of shadows
+            renderer.shadowMapEnabled = true;
+
+            //**Adding Lights
+            //We will be using Ambient light and Directional light (the sun)
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 1);//color and intensity (change intensity if you want brighter light)
+            directionalLight.position = new THREE.Vector3(100, 10, -50);
+            directionalLight.name = 'directional';
+            scene.add(directionalLight);
+
+            //With the above light setup, the back of the earth (the side not facing this directional light) 
+            //will be completely black. To make it look a little bit more realistic,
+            //we add an ambient light so that everything is a bit brighter.
+            var ambientLight = new THREE.AmbientLight(0x111111);
+            scene.add(ambientLight);
+
+            //Attach the renderer to the entire page
+            document.body.appendChild(renderer.domElement);
+
+            render();
+
+        }//init
+
+        //Function to create The earth's material
+        function createEarthMaterial() {
+
+            //NB: 4096 is the maximum width for maps
+
+            //Create earth texture
+            //Load the image (this is asynchronous)
+            var earthTexture = new THREE.ImageUtils.loadTexture("images/earth.jpg");
+
+            //Create the basic material
+            //a material that doesn't change the way it looks according to light sources
+            //var earthMaterial = new THREE.MeshBasicMaterial();
+
+            //Create Phong Material
+            //this material reacts to light sources
+            var earthMaterial = new THREE.MeshPhongMaterial();
+
+            //Attach the texture to the material by mappiing it unto the material
+            earthMaterial.map = earthTexture;
+
+            return earthMaterial;
+
+        }//createEarthMaterial
+
+        //function to create cloud material
+        function createCloudMaterial() {
+            var cloudTexture = THREE.ImageUtils.loadTexture("images/fair_clouds.png");
+            var cloudMaterial = new THREE.MeshBasicMaterial();
+            cloudMaterial.map = cloudTexture;
+            //Make the material transparent
+            //we set the material to be transparent so that we can also see the earth below the clouds
+            cloudMaterial.transparent = true;
+            return cloudMaterial;
+        }//createCloudMaterial
+
+        function render() {
+            renderer.render(scene, camera);
+            //Update controls
+            cameraControl.update();
+            //Setup render loop
+            requestAnimationFrame(render);
+        }//render
+    </script>
+</body>
+
+</html>
